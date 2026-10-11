@@ -1,0 +1,17 @@
+server:
+  port: 8081
+
+spring:
+  mongodb:
+    database: test
+  data:
+    mongodb:
+      database: test
+
+# Logging configuration
+logging:
+  level:
+    root: WARN
+    org.springframework: INFO
+    org.springframework.boot.context.config: DEBUG
+    org.springframework.boot.autoconfigure.mongo.embedded: DEBUG

@@ -1,0 +1,54 @@
+version: 2
+
+updates:
+  # Gradle dependency updates
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "gradle"
+    groups:
+      spring-framework:
+        patterns:
+          - "org.springframework.boot:*"
+          - "org.springframework:*"
+          - "org.springframework.security:*"
+          - "org.springframework.data:*"
+      testing:
+        patterns:
+          - "org.junit*:*"
+          - "org.mockito*:*"
+          - "org.testcontainers*:*"
+      jackson:
+        patterns:
+          - "tools.jackson*:*"
+          - "com.fasterxml.jackson*:*"
+      annotation-processors:
+        patterns:
+          - "org.projectlombok:*"
+          - "org.mapstruct:*"
+      documentation:
+        patterns:
+          - "org.springdoc:*"
+          - "org.webjars:*"
+
+  # GitHub Actions workflow updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      actions:
+        patterns:
+          - "*"

@@ -1,0 +1,19 @@
+version: "1.0"
+linter: jetbrains/qodana-jvm-community:2026.2
+profile:
+  name: qodana.recommended
+
+fixesStrategy: apply
+
+exclude:
+  - paths:
+      - build/**
+      - .gradle/**
+      - out/**
+      - generated/**
+      - node_modules/**
+
+failureConditions:
+  severityThresholds:
+    critical: 0
+    high: 5

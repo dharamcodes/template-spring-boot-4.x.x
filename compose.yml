@@ -1,0 +1,45 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: tragefox-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=tragefox
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - tragefox-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tragefox-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/tragefox
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/tragefox
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tragefox-network
+
+networks:
+  tragefox-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

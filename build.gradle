@@ -1,0 +1,174 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version "8.10.4"
+    id 'jacoco'
+}
+
+group = 'com.tragefox'
+version = '0.0.1-SNAPSHOT'
+description = 'tragefox'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+ext {
+    jwt_version = "0.13.0"
+    spotless_version = "8.10.4"
+    openApi = "3.1.1"
+    swaggerUi = "5.33.1"
+    jacksonVersion = "2.22.3"
+    mapStruct = "1.6.3"
+    lombokMapstructBinding = "0.2.0"
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jackson'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:$openApi"
+    implementation "org.webjars:swagger-ui:$swaggerUi"
+    implementation "io.jsonwebtoken:jjwt-api:$jwt_version"
+    implementation "org.mapstruct:mapstruct:$mapStruct"
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:$jwt_version"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:$jwt_version"
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:$lombokMapstructBinding"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapStruct"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-mongodb'
+}
+
+spotless {
+    java {
+        target 'src/*/java/**/*.java'
+        importOrder()
+        removeUnusedImports()
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        palantirJavaFormat('2.99.0')
+    }
+    format 'misc', {
+        target '**/*.gradle', '**/*.md', '.gitignore'
+        targetExclude 'build/**'
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format 'yaml', {
+        target '**/*.yml', '**/*.yaml'
+        targetExclude 'build/**'
+        leadingTabsToSpaces(2)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format 'properties', {
+        target '**/*.properties'
+        targetExclude 'build/**'
+        leadingTabsToSpaces(2)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+
+bootRun {
+    jvmArgs '--sun-misc-unsafe-memory-access=allow'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.annotationProcessorPath = configurations.annotationProcessor
+}
+
+def jacocoExcludes = [
+        'com/tragefox/api/**/config/**',
+        'com/tragefox/api/**/constant/**',
+        'com/tragefox/api/**/model/**',
+        'com/tragefox/api/**/repository/**',
+        'com/tragefox/api/**/filter/**',
+        'com/tragefox/api/**/helper/**',
+        'com/tragefox/api/**/setup/**',
+        'com/tragefox/api/**/mapper/**',
+        'com/tragefox/api/common/**',
+        'com/tragefox/api/exception/**'
+]
+
+jacocoTestReport {
+    dependsOn test, compileJava, processResources
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacoco/test/html')
+    }
+    classDirectories.setFrom(
+            files({
+                sourceSets.main.output.classesDirs.collect {
+                    fileTree(dir: it, exclude: jacocoExcludes)
+                }
+            })
+    )
+}
+
+tasks.named('jacocoTestCoverageVerification') {
+    dependsOn jacocoTestReport
+    violationRules {
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.95
+            }
+        }
+    }
+    classDirectories.setFrom(
+            files({
+                sourceSets.main.output.classesDirs.collect {
+                    fileTree(dir: it, exclude: jacocoExcludes)
+                }
+            })
+    )
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    maxParallelForks = 1
+    maxHeapSize = '1024m'
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
+}
+
+tasks.named("check") {
+    dependsOn(tasks.named("jacocoTestCoverageVerification"))
+}

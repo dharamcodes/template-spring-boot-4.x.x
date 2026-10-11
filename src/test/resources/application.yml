@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: tragefox-api
+  profiles:
+    active: test

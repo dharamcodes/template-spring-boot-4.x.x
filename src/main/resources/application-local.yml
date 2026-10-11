@@ -1,0 +1,16 @@
+server:
+  port: 8082
+
+# MongoDB configuration
+spring:
+  mongodb:
+    uri: mongodb://localhost:27017/
+    database: tragefox
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.boot.context.config: INFO
+    org.springframework.boot.autoconfigure.mongo.embedded: INFO
