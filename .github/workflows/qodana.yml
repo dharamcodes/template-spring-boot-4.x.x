@@ -70,7 +70,7 @@ jobs:
 
       - name: Create Pull Request for library upgrades
         if: always() && github.event_name != 'pull_request'
-        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "fix(deps): upgrade library versions in build.gradle from Qodana scan"
